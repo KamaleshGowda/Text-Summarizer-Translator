@@ -79,7 +79,14 @@ def main():
         
             if text.strip():  # Check if text is not empty
                 if choice == '1':
-                    summary = summarize_text_bert(text)
+                    while True:
+                        try:
+                            num_lines = int(input("Enter the number of lines for the summary: "))
+                            break
+                        except ValueError:
+                            print("Please enter a valid number.")
+                    
+                    summary = summarize_text_bert(text, num_sentences=num_lines)
                     print("\nSummary:")
                     print(summary)
                     
