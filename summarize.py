@@ -3,8 +3,6 @@ from nltk.tokenize import sent_tokenize
 from transformers import BertTokenizer, BertModel
 from sklearn.metrics.pairwise import cosine_similarity
 import torch 
-import requests
-from bs4 import BeautifulSoup
 
 # Ensure necessary NLTK data is downloaded
 nltk.download('punkt')
@@ -53,73 +51,3 @@ def summarize_text_bert(text, num_sentences=5):
     summary = ' '.join(summary_sentences)
     
     return summary
-
-def read_text_from_file(file_path):
-    """
-    Reads text from a given file path. Supports .txt and .pdf files.
-    
-    Parameters:
-    - file_path (str): The path to the input file.
-    
-    Returns:
-    - text (str): The text extracted from the file.
-    """
-    file_extension = file_path.split('.')[-1].lower()
-    try:
-        if file_extension == 'pdf':
-            return read_pdf_text(file_path)
-        elif file_extension in ['txt', 'text']:
-            with open(file_path, 'r', encoding='utf-8') as file:
-                text = file.read()
-            return text
-        else:
-            raise ValueError(f"Unsupported file format: '{file_extension}'. Only .txt and .pdf files are supported.")
-    except FileNotFoundError:
-        raise FileNotFoundError(f"File '{file_path}' not found.")
-    except Exception as e:
-        raise Exception(f"Error reading file '{file_path}': {e}")
-
-def read_pdf_text(file_path):
-    """
-    Reads text from a PDF file.
-    
-    Parameters:
-    - file_path (str): The path to the PDF file.
-    
-    Returns:
-    - text (str): The text extracted from the PDF.
-    """
-    try:
-        import fitz  # PyMuPDF is imported as fitz
-        text = ''
-        pdf_file = fitz.open(file_path)
-        num_pages = len(pdf_file)
-        
-        for page_num in range(num_pages):
-            page = pdf_file.load_page(page_num)
-            text += page.get_text()
-        
-        pdf_file.close()
-        return text
-    except Exception as e:
-        raise Exception(f"Error extracting text from PDF '{file_path}': {e}")
-
-def fetch_text_from_url(url):
-    """
-    Fetches text content from a given URL using web scraping.
-    
-    Parameters:
-    - url (str): The URL of the web page.
-    
-    Returns:
-    - text (str): The extracted text content from the web page.
-    """
-    try:
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
-        response = requests.get(url, headers=headers)
-        soup = BeautifulSoup(response.content, 'html.parser')
-        paragraphs = soup.find_all('p')
-        text = ' '.join([para.get_text() for para in paragraphs])
-        return text
-    except Exception as e:
-        raise Exception(f"Error fetching content from URL '{url}': {e}")
